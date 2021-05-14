@@ -1,7 +1,6 @@
 package dds.monedero.model;
 
 import dds.monedero.exceptions.MaximaCantidadDepositosException;
-import dds.monedero.exceptions.MaximoExtraccionDiarioException;
 import dds.monedero.exceptions.MontoNegativoException;
 import dds.monedero.exceptions.SaldoMenorException;
 
@@ -13,14 +12,16 @@ public class Cuenta {
 
   private double saldo;
   private List<Movimiento> movimientos = new ArrayList<>();
-  public static final double LIMITE = 1000;
   public static final int DEPOSITOS_MAXIMOS = 3;
+  private Limite limite;
 
   public Cuenta() {
     saldo = 0;
+    limite = new Limite(1000);
   }
-  public Cuenta(double montoInicial) {
+  public Cuenta(double montoInicial, Limite limite) {
     saldo = montoInicial;
+    limite = limite;
   }
 
   public void poner(double cuanto) {
@@ -43,7 +44,7 @@ public class Cuenta {
   public void sacar(double cuanto) {
     validarMonto(cuanto);
     validarSaldoNegativo(cuanto);
-    validarLimite(cuanto);
+    limite.validarLimite(cuanto, this);
     saldo -= cuanto;
     agregarMovimiento(LocalDate.now(), cuanto, false);
   }
@@ -52,18 +53,6 @@ public class Cuenta {
       throw new SaldoMenorException("No puede sacar mas de " + saldo + " $");
     }
   }
-  private void validarLimite(double cuanto){
-    double limite = calcularLimiteDisponible();
-    if (cuanto > limite) {
-      throw new MaximoExtraccionDiarioException("No puede extraer mas de $ " + LIMITE
-          + " diarios, límite: " + limite);
-    }
-  }
-  private double calcularLimiteDisponible(){
-    double montoExtraidoHoy = getMontoExtraidoA(LocalDate.now());
-    return LIMITE - montoExtraidoHoy;
-  }
-
   public void agregarMovimiento(LocalDate fecha, double cuanto, boolean esDeposito) {
     Movimiento movimiento = new Movimiento(fecha, cuanto, esDeposito);
     movimientos.add(movimiento);
