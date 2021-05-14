@@ -34,7 +34,7 @@ public class Cuenta {
     }
   }
   private void validarMovimiento(){
-    if (getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
+    if (movimientos.stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
       throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
     }
   }
@@ -58,14 +58,10 @@ public class Cuenta {
   }
 
   public double getMontoExtraidoA(LocalDate fecha) {
-    return getMovimientos().stream()
+    return movimientos.stream()
         .filter(movimiento -> !movimiento.isDeposito() && movimiento.getFecha().equals(fecha))
         .mapToDouble(Movimiento::getMonto)
         .sum();
-  }
-
-  public List<Movimiento> getMovimientos() {
-    return movimientos;
   }
 
   public double getSaldo() {
