@@ -17,7 +17,6 @@ public class Cuenta {
   public Cuenta() {
     saldo = 0;
   }
-
   public Cuenta(double montoInicial) {
     saldo = montoInicial;
   }
@@ -41,17 +40,23 @@ public class Cuenta {
   }
   public void sacar(double cuanto) {
     validarMonto(cuanto);
-    if (getSaldo() - cuanto < 0) {
-      throw new SaldoMenorException("No puede sacar mas de " + getSaldo() + " $");
+    validarSaldoNegativo(cuanto);
+    validarLimite(cuanto);
+    saldo -= cuanto;
+    agregarMovimiento(LocalDate.now(), cuanto, false);
+  }
+  private void validarSaldoNegativo(double cuanto){
+    if (saldo - cuanto < 0) {
+      throw new SaldoMenorException("No puede sacar mas de " + saldo + " $");
     }
+  }
+  private void validarLimite(double cuanto){
     double montoExtraidoHoy = getMontoExtraidoA(LocalDate.now());
     double limite = 1000 - montoExtraidoHoy;
     if (cuanto > limite) {
       throw new MaximoExtraccionDiarioException("No puede extraer mas de $ " + 1000
           + " diarios, límite: " + limite);
     }
-    saldo -= cuanto;
-    agregarMovimiento(LocalDate.now(), cuanto, false);
   }
 
   public void agregarMovimiento(LocalDate fecha, double cuanto, boolean esDeposito) {
@@ -69,9 +74,4 @@ public class Cuenta {
   public double getSaldo() {
     return saldo;
   }
-
-  public void setSaldo(double saldo) {
-    this.saldo = saldo;
-  }
-
 }
